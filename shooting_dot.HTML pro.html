@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>シューティングゲーム</title>
+  <style>
+    canvas { background: black; display: block; margin: auto; }
+  </style>
+</head>
+<body>
+<canvas width="480" height="320"></canvas>
+<script>
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 50, y: 150, w: 20, h: 20 };
+let bullets = [];
+let keys = {};
+let lastShotTime = 0;
+const shotCooldown = 300;
+let spacePressedLastFrame = false;
+
+document.addEventListener("keydown", e => keys[e.code] = true);
+document.addEventListener("keyup", e => keys[e.code] = false);
+
+function shoot() {
+  const now = Date.now();
+  if (now - lastShotTime < shotCooldown) return;
+  lastShotTime = now;
+  bullets.push({ x: player.x + player.w, y: player.y + player.h/2 - 2, w: 10, h: 4 });
+}
+
+function update() {
+  if (keys["ArrowUp"]) player.y -= 3;
+  if (keys["ArrowDown"]) player.y += 3;
+
+  if (keys["Space"] && !spacePressedLastFrame) shoot();
+  spacePressedLastFrame = keys["Space"];
+
+  bullets.forEach(b => b.x += 5);
+  bullets = bullets.filter(b => b.x < canvas.width);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "lime";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+  ctx.fillStyle = "white";
+  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
